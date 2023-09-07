@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("dbConnection")
+}
+
+model Note {
+  id      BigInt @id @default(autoincrement())
+  content String 
+  author  BigInt
+  title   String 
+  user    User   @relation(fields: [author], references: [id], onUpdate: Restrict)
+}
+
+model Tag {
+  id         BigInt   @id @default(autoincrement())
+  value      String
+  author     BigInt
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [author], references: [id])
+
+  @@unique([value, author], map: "unique_value")
+}
+
+model User {
+  id         BigInt   @id @default(autoincrement())
+  login      String   @unique()
+  password   String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  note       Note[]
+  tag        Tag[]
+}
